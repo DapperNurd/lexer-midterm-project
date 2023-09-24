@@ -1,32 +1,36 @@
+/**
+ * Ben Bonus
+ * PA1
+ * main.c
+*/
 #include "lexer.h"
 // ^ includes <stdio.h>, <stdlib.h>, <ctype.h>, and <string.h>
 
 int main(int argc, char *argv[]) {
 
-    // if(argc <= 1) {
-    //     printf("Please include the file name in the command line arguments.\nExmaple: ./lexer example.cci\n");
-    //     return 0;
-    // }
+    // Error msg if no file is added to the executable line in terminal
+    if(argc <= 1) { 
+        printf("Please include the file name in the command line arguments.\nExmaple: ./lexer example.cci\n");
+        return 0;
+    }
 
+    // File opening
     FILE *openedFile;
     FILE *outputFile;
 
-    // Open a file in read mode
-    openedFile = fopen(argv[1], "r");
-    strcat(argv[1], ".lexer");
-    outputFile = fopen(argv[1], "w");
+    openedFile = fopen(argv[1], "r"); // "r" read mode
+    strcat(argv[1], ".lexer"); // Adds ".lexer" onto the end of the argv[1] string for saving the new file
+    outputFile = fopen(argv[1], "w"); // "w" write mode
 
-    char myString[256];
+    // File processing and outputting
+    char myString[256]; // used for file reading
+    enum lexerState currState = none; // used for state handling... gets passed into function
 
-    enum lexerState currState = none;
-
-    // NOTE FOR LATER
-    // MAKE NUMEBR ALSO INCLUDE #
-
-    while(fgets(myString, 256, openedFile)) {
-        processString(myString, &currState, outputFile);
+    while(fgets(myString, 256, openedFile)) { // Reads to the end of file
+        processString(myString, &currState, outputFile); // Processes file line-by-line (outputs from within the function)
     }
 
+    // Closing file
     fclose(openedFile);
     fclose(outputFile);
 
