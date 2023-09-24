@@ -11,7 +11,7 @@ char* operatorList[] = { ":=", "..", "<<", ">>", "<>", "<=", ">=", "**", "!=", "
     ".", "<", ">", "(", ")", "+", "-", "*", "/", "|", "&", ";", ",", ":", "[", "]", "=" };
 
 
-char* processString(char* string, enum lexerState* state) {
+void processString(char* string, enum lexerState* state, FILE *file) {
 
     int stringLength = strlen(string);
 
@@ -19,24 +19,23 @@ char* processString(char* string, enum lexerState* state) {
 
     int dotCout;
 
-    char* tempStr = malloc(sizeof(char) * stringLength);
-
-    char* returnStr = malloc(384);
+    char* tokenStr = malloc(sizeof(char) * stringLength);
 
     for(int i = 0; i < stringLength; i++) {
 
         if(*state == none) {
-            memset(tempStr, '\0', stringLength); // clears anything in tempStr
+            memset(tokenStr, '\0', stringLength); // clears anything in tokenStr
             if(isalpha(string[i])) {
                 *state = eToken;
                 start = i;
             }
             else if(string[i] == '"') {
                 *state = eString;
-                start = i;
+            }
+            else if(string[i] == '\'') {
+                *state = eCharacter;
             }
             else if(string[i] == '/' && string[i+1] == '*') {
-                start = i;
                 *state = eComment;
             }
             else if(ispunct(string[i])) {
@@ -44,87 +43,82 @@ char* processString(char* string, enum lexerState* state) {
                 *state = eOperator;
             }
             else if(isdigit(string[i])) {
-                start = i;
                 dotCout = 0;
                 *state = eNumeric;
             }
         }
 
         if(*state == eToken) {
-            tempStr[i-start] = string[i];
+            tokenStr[i-start] = string[i];
+            fprintf(file, "%c", string[i]);
             if(!(isalnum(string[i+1]) || string[i+1] == '_')) { // is letter, digit, or _
-                processWord(tempStr);
-                strcat(returnStr, tempStr);
+                processWord(tokenStr, file);
                 *state = none;
             }
         }
         else if(*state == eOperator) {
-            tempStr[i-start] = string[i];
+            tokenStr[i-start] = string[i];
+            fprintf(file, "%c", string[i]);
             if(checkForSelectCases(string[i], string[i+1])) {
-                tempStr[i+1-start] = string[i+1];
+                tokenStr[i+1-start] = string[i+1];
+                fprintf(file, "%c", string[i+1]);
                 i++;
             }
-            processOperator(tempStr);
-            strcat(returnStr, tempStr);
+            processOperator(tokenStr, file);
             *state = none;
         }
         else if(*state == eNumeric) {
-            tempStr[i-start] = string[i];
+            fprintf(file, "%c", string[i]);
             if(string[i+1] == '.' && isdigit(string[i+2]) && dotCout < 1) {
-                tempStr[i+1-start] = string[i+1];
-                tempStr[i+2-start] = string[i+2];
+                fprintf(file, "%c", string[i+1]);
                 dotCout++;
-                i += 2;
+                i++;
             }
-            else if(!isdigit(string[i+1])) {
-                strcat(tempStr, " (numeric)\n");
-                strcat(returnStr, tempStr);
+            else if(!(isdigit(string[i+1]) || string[i+1] == '#')) {
+                fprintf(file, "%s", " (numeric literal)\n");
                 *state = none;
             }
         }
         else if(*state == eString) {
-            tempStr[i-start] = string[i];
+            fprintf(file, "%c", string[i]);
             if(string[i+1] == '"') { // checking to see if the next char is a string (end of string)
-                tempStr[i+1-start] = string[i+1];
+                fprintf(file, "%c", string[i+1]);
                 i++; // increments past the closing " so it dosen't start the string again
-                strcat(tempStr, " (string)\n");
-                strcat(returnStr, tempStr);
+                fprintf(file, "%s", " (string)\n");
                 *state = none;
             }
         }
+        else if(*state == eCharacter) {
+            fprintf(file, "%c%c%c%s", string[i], string[i+1], string[i+2], " (character literal)\n");
+            i += 2;
+            *state = none;
+        }
         else if(*state == eComment) {
-            tempStr[i-start] = string[i];
-            if(string[i] == '*' && string[i+1] == '/') {    
-                tempStr[i+1-start] = string[i+1];
+            fprintf(file, "%c", string[i]);
+            if(string[i] == '*' && string[i+1] == '/') {   
+                fprintf(file, "%c", string[i+1]);
                 i++;
-                strcat(tempStr, " (comment)\n");
-                strcat(returnStr, tempStr);
+                fprintf(file, "%s", " (comment)\n");
                 *state = none;
-            }
-            if(i == stringLength - 1) { // Runs at the end of the line, so comments still get printed even if they aren't closed
-                strcat(returnStr, tempStr);
             }
         }
     }
     
-    free(tempStr);
-    return returnStr;
+    free(tokenStr);
 }
 
-void processWord(char* string) {
+void processWord(char* string, FILE *file) {
 
     for(int i = 0; i < KEYWORDS_COUNT; i++) {
         if(strcmp(string, keywordsList[i]) == 0) { // strcmp returns 0 if they are equal
-            // printf("found string: %s\n", string);
-            strcat(string, " (keyword)\n");
+            fprintf(file, "%s", " (keyword)\n");
             return;
         }
     }
-    // printf("did not find string: %s\n", string);
-    strcat(string, " (identifier)\n");
+    fprintf(file, "%s", " (identifier)\n");
 }
 
-void processOperator(char* string) {
+void processOperator(char* string, FILE *file) {
 
     // Before doing it this way I had a very long switch statemtnt to check for every type of operator
     // I'm not sure that this way is necessarily more practical, or even efficient, but it is WAY
@@ -132,13 +126,11 @@ void processOperator(char* string) {
 
     for(int i = 0; i < OPERATOR_COUNT; i++) {
         if(strcmp(string, operatorList[i]) == 0) { // strcmp returns 0 if they are equal
-            // printf("found string: %s\n", string);
-            strcat(string, " (operator)\n");
+            fprintf(file, "%s", " (operator)\n");
             return;
         }
     }
-    // printf("did not find string: %s\n", string);
-    strcat(string, " (UNK)\n");
+    fprintf(file, "%s", " (UNK)\n");
 }
 
 int checkForSelectCases(char char1, char char2) {
@@ -149,9 +141,9 @@ int checkForSelectCases(char char1, char char2) {
     char string[2] = { char1, char2 };
     for(int i = 0; i < COUNT; i++) {
         if(strcmp(string, doubleOperators[i]) == 0) {
-            return 1;
+            return 1; // != 0 is true, == 0 is false
         }
     }
 
-    return 0;
+    return 0; // != 0 is true, == 0 is false
 }

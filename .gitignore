@@ -5,6 +5,7 @@
 *.i*86
 *.x86_64
 *.hex
+lexer
 
 # Debug files
 *.dSYM/

@@ -6,7 +6,7 @@
 #include <string.h>
 #include <ctype.h>
 
-enum lexerState { none, eComment, eString, eOperator, eNumeric, eToken };
+enum lexerState { none, eComment, eString, eCharacter, eOperator, eNumeric, eToken };
 
 /** Notes for myself
  * all operators that have more than one char start with a single char operator (!= starts with !, which is its own operator)
@@ -15,11 +15,11 @@ enum lexerState { none, eComment, eString, eOperator, eNumeric, eToken };
  * UNK is unknown and SHOULD NOT be found, but include for debugging
 */
 
-char* processString(char string[], enum lexerState* state);
+void processString(char string[], enum lexerState* state, FILE *file);
 
-void processWord(char* string);
+void processWord(char* string, FILE *file);
 
-void processOperator(char* string);
+void processOperator(char* string, FILE *file);
 
 int checkForSelectCases(char char1, char char2);
 

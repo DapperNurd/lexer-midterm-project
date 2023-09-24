@@ -9,12 +9,12 @@ int main(int argc, char *argv[]) {
     // }
 
     FILE *openedFile;
-    // FILE *outputFile;
+    FILE *outputFile;
 
     // Open a file in read mode
-    // openedFile = fopen(argv[1], "r");
-    // outputFile = fopen(argv[1] + ".lexer", "w");
-    openedFile = fopen("files/trie.cci", "r");
+    openedFile = fopen(argv[1], "r");
+    strcat(argv[1], ".lexer");
+    outputFile = fopen(argv[1], "w");
 
     char myString[256];
 
@@ -24,19 +24,11 @@ int main(int argc, char *argv[]) {
     // MAKE NUMEBR ALSO INCLUDE #
 
     while(fgets(myString, 256, openedFile)) {
-        // printf("%i\n", strlen(myString));
-        // currState = processString(myString, currState);
-
-        char* processedStr = malloc(384);
-        strcpy(processedStr, processString(myString, &currState));
-        printf("%s", processedStr);
-        free(processedStr);
-        
-        // printf("%s", processString(myString, &currState));
-        // processString(myString, &currState);
+        processString(myString, &currState, outputFile);
     }
 
     fclose(openedFile);
+    fclose(outputFile);
 
     return 0;
 }
