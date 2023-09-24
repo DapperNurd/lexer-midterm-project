@@ -99,7 +99,7 @@ void processString(char* string, enum lexerState* state, FILE *file) {
                 i++; // Increases i
             }
             // STATE END CHECK
-            else if(!(isdigit(string[i+1]) || string[i+1] == '#')) { // If the next char is not a digit or a '#'
+            else if(!(isdigit(string[i+1]) || (isdigit(string[i]) && string[i+1] == '#'))) { // If the next char is not a digit or a '#'
                 fprintf(file, "%s", " (numeric literal)\n"); // Prints the type and a new line
                 *state = none; // Set state to none
             }
