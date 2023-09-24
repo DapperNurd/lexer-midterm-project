@@ -15,7 +15,7 @@ char* processString(char* string, enum lexerState* state) {
 
     int stringLength = strlen(string);
 
-    int start;
+    int start = 0;
 
     int dotCout;
 
@@ -94,8 +94,7 @@ char* processString(char* string, enum lexerState* state) {
         }
         else if(*state == eComment) {
             tempStr[i-start] = string[i];
-            if(string[i] == '*' && string[i+1] == '/') {
-                // NOTE FOR LATER, DOESNT COPY NEW LINE AT END OF COMMENT      
+            if(string[i] == '*' && string[i+1] == '/') {    
                 tempStr[i+1-start] = string[i+1];
                 i++;
                 strcat(tempStr, " (comment)\n");
@@ -108,6 +107,7 @@ char* processString(char* string, enum lexerState* state) {
         }
     }
     
+    free(tempStr);
     return returnStr;
 }
 
