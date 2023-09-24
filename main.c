@@ -19,6 +19,11 @@ int main(int argc, char *argv[]) {
     FILE *outputFile;
 
     openedFile = fopen(argv[1], "r"); // "r" read mode
+    if(openedFile == NULL) { // Checks to make sure the openedFile exists, otherwise returns.
+        printf("ERROR: File not found.\n");
+        return 0;
+    }
+
     strcat(argv[1], ".lexer"); // Adds ".lexer" onto the end of the argv[1] string for saving the new file
     outputFile = fopen(argv[1], "w"); // "w" write mode
 
