@@ -1,5 +1,25 @@
 # Lexer (Midterm Project)
 ## Intro
+
+````
+module complex_number interface
+
+    type complex_number_type;
+
+    /*
+     * accessors
+     */
+    accessor imaginary(c: complex_number_type) return float;
+    accessor real(c: complex_number_type) return float;
+    /*
+     * operations
+     */
+    function "-"(c1, c2: complex_number_type) return complex_number_type;
+    function "+"(c1, c2: complex_number_type) return complex_number_type;
+
+end complex_number;
+````
+
 Modern translation systems often use lexical analysis to divide input into meaningful units. Once these meaningful units (or lexemes or tokens) have been derived, other components within the translation system are used to determine the relationships among the lexemes. Lexical analyzers (or lexers) are commonly used in compilers, interpreters, and other translation systems that you have often used. The act of lexical analysis is also known as scanning. For this assignment, you are to build a lexer that will successfully scan through a set of programs expressed in the CCX programming language. You have never used CCX, and that is just fine: scanning through CCX programs won't require intimate knowledge of CCX. 
 * Your lexer shall be written in the C programming language.
 * Your lexer will be compiled and tested using GitHub codespace (default configuration), so you should test your lexer in this environment.
